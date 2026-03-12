@@ -45,11 +45,15 @@ const Login = () => {
 
     try {
       if (mode === "signup") {
+        // Use window.location.origin to ensure we redirect back to the current domain (Vercel or local)
+        // Note: For this to work in production, you MUST add https://migrant-portal.vercel.app to "Redirect URLs" in Supabase -> Auth -> Settings
+        const redirectUrl = `${window.location.origin}/login`;
+        
         const { data, error: signUpError } = await activeSupabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin + "/login",
+            emailRedirectTo: redirectUrl,
           },
         });
         if (signUpError) throw signUpError;

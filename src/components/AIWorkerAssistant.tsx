@@ -78,32 +78,44 @@ const AIWorkerAssistant = ({ profile, jobs, appliedJobs, onTabChange }: AIWorker
 
         // --- 1. Weighted Intent Detection ---
         const scores = {
-            JOBS: (query.match(/job|work|hiring|vacancy|salary|electrician|plumber|construction|cleaner|helper|driver|carpenter|tailor|welder/g) || []).length * 5,
-            SCHEMES: (query.match(/scheme|yojana|welfare|government|benefit|eshram|ration|card|pension|money|relief|fund/g) || []).length * 8,
-            APPLY: (query.match(/apply|register|join|process|how to|steps|procedure|method/g) || []).length * 4,
-            SERVICES: (query.match(/hospital|clinic|medical|health|healthcare|doctor|hostel|stay|room|place|accommodation|safety|nearby|near|location|find|map|where/g) || []).length * 12,
-            HELP: (query.match(/help|guide|use|platform|profile|update|edit|broken|working/g) || []).length * 2
+            JOBS: (query.match(/job|work|hiring|vacancy|salary|opening|role|position/g) || []).length * 10,
+            ROLES: (query.match(/electrician|plumber|construction|cleaner|helper|driver|carpenter|tailor|welder|mason|painter|security/g) || []).length * 15,
+            SCHEMES: (query.match(/scheme|yojana|welfare|government|benefit|eshram|ration|card|pension|money|relief|fund/g) || []).length * 12,
+            APPLY: (query.match(/apply|register|join|process|how to|steps|procedure|method/g) || []).length * 5,
+            HEALTH: (query.match(/hospital|clinic|medical|health|healthcare|doctor|medicine|nurse|sick|pain/g) || []).length * 15,
+            STAY: (query.match(/hostel|stay|room|place|accommodation|rent|sleep|housing/g) || []).length * 15,
+            LOCATION: (query.match(/nearby|near|location|find|map|where|site|address/g) || []).length * 3
         };
 
-        // Explicit High-Priority Overrides (100% Correct Match for Buttons/Explicit Keywords)
-        if (query.includes("nearby healthcare support") || query.includes("find hospital") || query.includes("find clinic")) scores.SERVICES += 50;
-        if (query.includes("scheme") || query.includes("yojana") || query.includes("what schemes are available")) scores.SCHEMES += 50;
-        if (query.includes("job") || query.includes("work") || query.includes("find jobs based on my profile")) scores.JOBS += 50;
+        // Explicit High-Priority Overrides
+        if (query.includes("nearby healthcare support") || query.includes("find hospital")) scores.HEALTH += 100;
+        if (query.includes("nearby accommodation") || query.includes("find hostel")) scores.STAY += 100;
+        if (query.includes("scheme") || query.includes("yojana") || query.includes("what schemes are available")) scores.SCHEMES += 100;
+        if (query.includes("job") || query.includes("work") || query.includes("find jobs based on my profile")) scores.JOBS += 100;
 
         // Boost scores strictly based on current topic
-        if (currentTopic === "jobs") scores.JOBS += 5;
-        if (currentTopic === "schemes") scores.SCHEMES += 5;
-        if (currentTopic === "services") scores.SERVICES += 5;
+        if (currentTopic === "jobs") scores.JOBS += 10;
+        if (currentTopic === "schemes") scores.SCHEMES += 10;
+        if (currentTopic === "services") { scores.HEALTH += 10; scores.STAY += 10; }
 
-        // Determine primary intent (only if score is above a threshold)
-        const entries = Object.entries(scores).filter(e => e[1] > 0);
-        const primaryIntent = entries.length > 0 ? entries.reduce((a, b) => b[1] > a[1] ? b : a)[0] : null;
+        // Aggregate scores for main categories
+        const aggregateScores = {
+            JOBS: scores.JOBS + scores.ROLES,
+            SCHEMES: scores.SCHEMES,
+            APPLY: scores.APPLY,
+            SERVICES: scores.HEALTH + scores.STAY + (scores.LOCATION > 5 ? scores.LOCATION : 0),
+            HELP: (query.match(/help|guide|use|platform|profile|update|edit|broken|working/g) || []).length * 5
+        };
+
+        // Determine primary intent
+        const entries = Object.entries(aggregateScores).filter(e => e[1] > 0);
+        const primaryIntent = entries.length > 0 ? entries.sort((a, b) => b[1] - a[1])[0][0] : null;
 
         // --- 2. Intent Resolution Logic ---
 
-        // A. If user is asking HOW TO APPLY (Prioritize schemes if mentioned or in topic)
-        if (scores.APPLY > 2 || (primaryIntent === "APPLY")) {
-            if (scores.SCHEMES > 0 || currentTopic === "schemes") {
+        // A. If user is asking HOW TO APPLY
+        if (primaryIntent === "APPLY" || aggregateScores.APPLY > 10) {
+            if (aggregateScores.SCHEMES > 5 || currentTopic === "schemes") {
                 const scheme = WORKER_SCHEMES.find(s => query.includes(s.name.toLowerCase())) || WORKER_SCHEMES[0];
                 response.content = t("aiSchemeHelp")
                     .replace("{scheme}", scheme.name)
@@ -117,9 +129,9 @@ const AIWorkerAssistant = ({ profile, jobs, appliedJobs, onTabChange }: AIWorker
                 setCurrentTopic("jobs");
             }
         }
-        // B. Services Intent (Location/Map/Nearby) - Higher Priority for location words
-        else if (primaryIntent === "SERVICES" || scores.SERVICES > 5) {
-            if (query.includes("hostel") || query.includes("stay") || query.includes("room") || query.includes("accommodation")) {
+        // B. Services Intent (Health/Stay)
+        else if (primaryIntent === "SERVICES" || aggregateScores.SERVICES > 15) {
+            if (scores.STAY > scores.HEALTH || query.includes("hostel") || query.includes("stay") || query.includes("room") || query.includes("accommodation")) {
                 response.content = t("aiHostelHelp");
                 response.type = "services";
                 response.data = { category: "accommodations", label: t("accommodations") };
@@ -131,7 +143,7 @@ const AIWorkerAssistant = ({ profile, jobs, appliedJobs, onTabChange }: AIWorker
             setCurrentTopic("services");
         }
         // C. Schemes Intent
-        else if (primaryIntent === "SCHEMES" || scores.SCHEMES > 5) {
+        else if (primaryIntent === "SCHEMES" || aggregateScores.SCHEMES > 5) {
             const matched = WORKER_SCHEMES.filter(s =>
                 query.includes(s.name.toLowerCase()) ||
                 query.includes(s.category.toLowerCase()) ||
@@ -152,7 +164,7 @@ const AIWorkerAssistant = ({ profile, jobs, appliedJobs, onTabChange }: AIWorker
             setCurrentTopic("schemes");
         }
         // D. Jobs Intent
-        else if (primaryIntent === "JOBS" || scores.JOBS > 2) {
+        else if (primaryIntent === "JOBS" || aggregateScores.JOBS > 5) {
             const skills = profile?.skills || [];
             const preferredLocation = profile?.preferred_job_location?.toLowerCase() || "";
 
@@ -160,10 +172,12 @@ const AIWorkerAssistant = ({ profile, jobs, appliedJobs, onTabChange }: AIWorker
                 let s = 0;
                 // Match with profile skills
                 if (skills.some((sk: string) => job.title.toLowerCase().includes(sk.toLowerCase()))) s += 5;
-                // Match with query keywords
-                if (query.match(/electrician|plumber|construction|helper|driver|welder|tailor/g)) {
-                    const match = query.match(/electrician|plumber|construction|helper|driver|welder|tailor/g);
-                    if (match && job.title.toLowerCase().includes(match[0])) s += 15;
+                // Match with query keywords or roles from scores
+                if (scores.ROLES > 0) {
+                    const roles = ["electrician", "plumber", "construction", "helper", "driver", "welder", "tailor", "mason", "painter", "security"];
+                    roles.forEach(role => {
+                        if (query.includes(role) && job.title.toLowerCase().includes(role)) s += 20;
+                    });
                 }
                 if (preferredLocation && job.location.toLowerCase().includes(preferredLocation)) s += 5;
                 return { ...job, score: s };
@@ -182,21 +196,8 @@ const AIWorkerAssistant = ({ profile, jobs, appliedJobs, onTabChange }: AIWorker
             }
             setCurrentTopic("jobs");
         }
-        // D. Services Intent
-        else if (primaryIntent === "SERVICES" || scores.SERVICES > 1) {
-            if (query.includes("hostel") || query.includes("stay") || query.includes("room")) {
-                response.content = t("aiHostelHelp");
-                response.type = "services";
-                response.data = { category: "accommodations", label: t("accommodations") };
-            } else {
-                response.content = t("aiHealthcareHelp");
-                response.type = "services";
-                response.data = { category: "hospitals", label: t("healthcareSupport") };
-            }
-            setCurrentTopic("services");
-        }
         // E. Help/Profile Intent
-        else if (primaryIntent === "HELP" || scores.HELP > 1) {
+        else if (primaryIntent === "HELP" || aggregateScores.HELP > 5) {
             if (query.includes("profile") || query.includes("update")) {
                 response.content = t("aiProfileHelp");
             } else {

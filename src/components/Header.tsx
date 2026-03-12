@@ -283,39 +283,31 @@ const Header = () => {
             </Popover>
           )}
 
-          {/* Settings Page Link */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="touch-target text-muted-foreground hover:text-foreground"
-                title={t("settings")}
-              >
-                <SettingsIcon className="h-5 w-5" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-48 p-2 overflow-hidden bg-card border-border" align="end">
-              <div className="flex flex-col gap-1">
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start gap-2 h-10 px-3 font-bold" 
-                  onClick={() => navigate(location.pathname.startsWith("/admin") ? "/admin/settings" : "/settings")}
-                >
-                  <SettingsIcon className="h-4 w-4 text-primary" />
-                  {t("settings")}
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start gap-2 h-10 px-3 font-bold text-destructive hover:text-destructive hover:bg-destructive/10"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="h-4 w-4" />
-                  {t("logout")}
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
+          {/* Settings Page Link (Direct) */}
+          {user && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="touch-target text-muted-foreground hover:text-foreground"
+              title={t("settings")}
+              onClick={() => navigate(location.pathname.startsWith("/admin") ? "/admin/settings" : "/settings")}
+            >
+              <SettingsIcon className="h-5 w-5" />
+            </Button>
+          )}
+
+          {/* Logout Button */}
+          {user && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="touch-target text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              title={t("logout")}
+              onClick={handleLogout}
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
+          )}
 
           {/* User Section - Hidden on admin page */}
           {!location.pathname.startsWith("/admin") && (
