@@ -32,6 +32,12 @@ const AdminSettings = () => {
     const { theme, setTheme } = useTheme();
     const navigate = useNavigate();
 
+    const handleLogout = () => {
+        sessionStorage.removeItem("adminAuth");
+        toast.success("Logged out successfully");
+        navigate("/admin");
+    };
+
     const [notifs, setNotifs] = useState(() => ({
         newUserReg: localStorage.getItem("admin_setting_newUserReg") !== "false",
         jobPosting: localStorage.getItem("admin_setting_jobPosting") !== "false",
@@ -70,7 +76,7 @@ const AdminSettings = () => {
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="mb-6"
+                    className="mb-6 flex justify-between items-center"
                 >
                     <Button
                         type="button"
@@ -80,6 +86,14 @@ const AdminSettings = () => {
                     >
                         <ChevronLeft className="h-4 w-4" />
                         {t('back')} to Dashboard
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleLogout}
+                        className="h-8"
+                    >
+                        Logout
                     </Button>
                 </motion.div>
 
