@@ -2,7 +2,7 @@ export type Language = "en" | "ta" | "hi";
 
 export const translations: Record<Language, Record<string, string>> = {
   en: {
-    portalName: "Migrant Portal",
+    portalName: "Migrant Connect",
     subtitle: "Integrated Support Network",
     workerPortal: "Worker Portal",
     providerPortal: "Provider Portal",
@@ -288,7 +288,7 @@ export const translations: Record<Language, Record<string, string>> = {
     contactTechSupport: "Contact Technical Support",
   },
   ta: {
-    portalName: "புலம்பெயர் போர்ட்டல்",
+    portalName: "புலம்பெயர் கனெக்ட்",
     subtitle: "ஒருங்கிணைந்த ஆதரவு தளம்",
     workerPortal: "தொழிலாளர் போர்ட்டல்",
     providerPortal: "வழங்குநர் போர்ட்டல்",
@@ -575,7 +575,7 @@ export const translations: Record<Language, Record<string, string>> = {
     contactTechSupport: "தொழில்நுட்ப ஆதரவைத் தொடர்பு கொள்ளவும்",
   },
   hi: {
-    portalName: "प्रवासी पोर्टल",
+    portalName: "प्रवासी कनेक्ट",
     subtitle: "एकीकृत सहायता नेटवर्क",
     workerPortal: "श्रमिक पोर्टल",
     providerPortal: "प्रदाता पोर्टल",

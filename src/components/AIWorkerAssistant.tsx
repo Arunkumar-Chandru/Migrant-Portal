@@ -233,7 +233,7 @@ const AIWorkerAssistant = ({ profile, jobs, appliedJobs, onTabChange }: AIWorker
     };
 
     return (
-        <div className="fixed bottom-6 right-6 z-40">
+        <div className="fixed bottom-6 right-6 z-[60]">
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -241,10 +241,10 @@ const AIWorkerAssistant = ({ profile, jobs, appliedJobs, onTabChange }: AIWorker
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: "100%" }}
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className="fixed inset-0 sm:inset-4 z-50 bg-card border-none sm:border border-border sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+                        className="fixed inset-0 sm:inset-auto sm:bottom-24 sm:right-6 sm:w-[440px] sm:h-[calc(100vh-140px)] sm:max-h-[700px] z-[60] bg-card border-none sm:border border-border sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col"
                     >
                         {/* Chat Header */}
-                        <div className="p-4 sm:p-5 bg-card border-b border-border flex items-center justify-between shadow-lg">
+                        <div className="p-4 sm:p-5 pt-10 sm:pt-5 bg-card border-b border-border flex items-center justify-between shadow-lg">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-orange-500/10 rounded-lg text-orange-500 border border-orange-500/20">
                                     <Bot className="h-6 w-6" />

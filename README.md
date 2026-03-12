@@ -1,4 +1,4 @@
-# Migrant Portal
+# Migrant Connect
 
 A comprehensive digital platform designed to support migrant workers and job providers. This portal facilitates job searching, application tracking, and administrative management for migrant worker recruitment and support schemes.
 

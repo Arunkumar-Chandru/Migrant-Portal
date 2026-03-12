@@ -69,7 +69,7 @@ const Login = () => {
     try {
       if (mode === "signup") {
         // Use window.location.origin to ensure we redirect back to the current domain (Vercel or local)
-        // Note: For this to work in production, you MUST add https://migrant-portal.vercel.app to "Redirect URLs" in Supabase -> Auth -> Settings
+        // Note: For this to work in production, you MUST add https://migrant-connect.vercel.app to "Redirect URLs" in Supabase -> Auth -> Settings
         const redirectUrl = `${window.location.origin}/login`;
         
         const { data, error: signUpError } = await activeSupabase.auth.signUp({
@@ -239,14 +239,14 @@ const Login = () => {
         <div className="rounded-lg border border-border bg-card p-4 sm:p-8">
           <div className="text-center mb-8">
             <div className={`w-20 h-20 rounded-2xl ${iconBg} p-0.5 flex items-center justify-center mx-auto mb-4 overflow-hidden shadow-lg border-2 border-border/50`}>
-              <img src="/portal-logo.png" alt="Migrant Portal Logo" className="w-full h-full object-cover rounded-2xl" />
+              <img src="/portal-logo.png" alt="Migrant Connect Logo" className="w-full h-full object-cover rounded-2xl" />
             </div>
             <h1 className="text-2xl font-bold text-foreground">
               {getTitle()}
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
               {intendedRole
-                ? `Join the Migrant Portal as a ${role}`
+                ? `Join Migrant Connect as a ${role}`
                 : t("subtitle")}
             </p>
           </div>

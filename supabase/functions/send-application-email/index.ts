@@ -44,7 +44,7 @@ serve(async (req) => {
         // Email to Worker
         if (workerEmail) {
             emails.push({
-                from: 'Migrant Portal <notifications@resend.dev>',
+                from: 'Migrant Connect <notifications@resend.dev>',
                 to: workerEmail,
                 subject: `Application Successful: ${jobTitle}`,
                 html: `
@@ -58,7 +58,7 @@ serve(async (req) => {
         // Email to Provider
         if (providerEmail) {
             emails.push({
-                from: 'Migrant Portal <notifications@resend.dev>',
+                from: 'Migrant Connect <notifications@resend.dev>',
                 to: providerEmail,
                 subject: `New Application: ${jobTitle}`,
                 html: `
