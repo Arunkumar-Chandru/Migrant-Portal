@@ -31,7 +31,6 @@ import {
   CheckCircle,
   Clock,
   MessageSquare,
-  Settings,
   XCircle
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -509,26 +508,6 @@ const AdminDashboard = () => {
             <div className="flex items-center gap-3">
               <ShieldX className="h-7 w-7 text-primary" />
               <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
-            </div>
-            {/* settings + logout controls */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate("/admin/settings")}
-                className="h-8 w-8 p-0"
-                aria-label="Admin settings"
-              >
-                <Settings className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleLogout}
-                className="h-8"
-              >
-                Logout
-              </Button>
             </div>
           </div>
           <p className="text-muted-foreground">Manage workers, providers, jobs, and applications.</p>

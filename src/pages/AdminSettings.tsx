@@ -32,11 +32,6 @@ const AdminSettings = () => {
     const { theme, setTheme } = useTheme();
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        sessionStorage.removeItem("adminAuth");
-        toast.success("Logged out successfully");
-        navigate("/admin");
-    };
 
     const [notifs, setNotifs] = useState(() => ({
         newUserReg: localStorage.getItem("admin_setting_newUserReg") !== "false",
@@ -86,14 +81,6 @@ const AdminSettings = () => {
                     >
                         <ChevronLeft className="h-4 w-4" />
                         {t('back')} to Dashboard
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={handleLogout}
-                        className="h-8"
-                    >
-                        Logout
                     </Button>
                 </motion.div>
 
