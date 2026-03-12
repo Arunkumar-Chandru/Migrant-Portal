@@ -555,12 +555,9 @@ const WorkerPortal = () => {
 
   const userLoc = profile?.preferred_job_location?.toLowerCase() || "";
 
-  // Merge predefined static jobs with provider-posted Supabase jobs.
-  // STRICTLY filter for 'active' jobs only from both sources.
-  const mergedJobs = [
-    ...ALL_JOBS.filter(j => j.status === "active"),
-    ...jobs.filter(j => j.status === "active"),
-  ];
+  // Use provider-posted Supabase jobs only.
+  // STRICTLY filter for 'active' jobs only.
+  const mergedJobs = jobs.filter(j => j.status === "active");
 
   const processedJobs = mergedJobs.filter(job => {
     if (!showOnlyNearby || !userLoc) return true;

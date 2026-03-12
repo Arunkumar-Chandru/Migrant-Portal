@@ -64,28 +64,18 @@ const JobDetails = () => {
             if (!id) return;
             setLoading(true);
             try {
-                console.log("Fetching job with ID:", id);
-                // 1. Check static jobs first
-                const staticJob = ALL_JOBS.find(j => j.id === id?.trim());
+                console.log("Fetching job from Supabase with ID:", id);
+                const { data: jobData, error: jobError } = await supabase
+                    .from("jobs")
+                    .select("*")
+                    .eq("id", id)
+                    .eq("status", "active") // Only Active jobs for discovery
+                    .single();
 
-                if (staticJob && staticJob.status === "active") {
-                    console.log("Found static job:", staticJob.title);
-                    setJob(staticJob as unknown as Job);
-                } else {
-                    console.log("Job not found in static list (or not active), checking Supabase...");
-                    // 2. If not found in static, fetch from Supabase
-                    const { data: jobData, error: jobError } = await supabase
-                        .from("jobs")
-                        .select("*")
-                        .eq("id", id)
-                        .eq("status", "active") // Only Active jobs for discovery
-                        .single();
-
-                    if (jobError) {
-                        console.log("Supabase fetch failed or job not active:", jobError.message);
-                    }
-                    setJob(jobData);
+                if (jobError) {
+                    console.log("Supabase fetch failed or job not active:", jobError.message);
                 }
+                setJob(jobData);
 
                 // Fetch Profile for skill matching and check application status
                 const { data: { session } } = await supabase.auth.getSession();
@@ -147,14 +137,6 @@ const JobDetails = () => {
                 return;
             }
 
-            // 2. Handle STATIC JOBS (Option A): Skip DB insert to avoid UUID errors
-            if (id?.startsWith("static_")) {
-                console.log("Static job detected, skipping DB insert for demo purposes.");
-                toast.success("Demo Application submitted successfully!");
-                setHasApplied(true);
-                setApplying(false);
-                return;
-            }
 
             const { error } = await supabase
                 .from("job_applications")
