@@ -147,6 +147,15 @@ const JobDetails = () => {
                 return;
             }
 
+            // 2. Handle STATIC JOBS (Option A): Skip DB insert to avoid UUID errors
+            if (id?.startsWith("static_")) {
+                console.log("Static job detected, skipping DB insert for demo purposes.");
+                toast.success("Demo Application submitted successfully!");
+                setHasApplied(true);
+                setApplying(false);
+                return;
+            }
+
             const { error } = await supabase
                 .from("job_applications")
                 .insert({
