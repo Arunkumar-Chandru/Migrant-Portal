@@ -32,6 +32,7 @@ const Header = () => {
   const [userRole, setUserRole] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const [isAdmin, setIsAdmin] = useState(() => sessionStorage.getItem("adminAuth") === "true");
 
   useEffect(() => {
     // Determine which client to subscribe to
@@ -39,11 +40,13 @@ const Header = () => {
 
     const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setIsAdmin(sessionStorage.getItem("adminAuth") === "true");
       if (!session) setProfile(null);
     });
 
     client.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      setIsAdmin(sessionStorage.getItem("adminAuth") === "true");
     });
 
     return () => subscription.unsubscribe();
@@ -101,6 +104,7 @@ const Header = () => {
     const client = getSupabase();
     await client.auth.signOut();
     sessionStorage.removeItem("adminAuth");
+    setIsAdmin(false);
     navigate("/login");
     toast.success("Logged out successfully");
   };
@@ -284,7 +288,7 @@ const Header = () => {
           )}
 
           {/* Settings Page Link (Direct) */}
-          {user && (
+          {(user || isAdmin) && (
             <Button
               variant="ghost"
               size="icon"
@@ -297,7 +301,7 @@ const Header = () => {
           )}
 
           {/* Logout Button */}
-          {user && (
+          {(user || isAdmin) && (
             <Button
               variant="ghost"
               size="icon"
