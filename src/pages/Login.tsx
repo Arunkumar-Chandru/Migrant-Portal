@@ -35,6 +35,29 @@ const Login = () => {
     }
   }, [intendedRole]);
 
+  // Handle error fragments in the URL (e.g. from expired email links)
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.includes("error_description")) {
+      const params = new URLSearchParams(hash.replace("#", "?"));
+      const errorDesc = params.get("error_description");
+      if (errorDesc) {
+        let helpMessage = errorDesc.replace(/\+/g, " ");
+        
+        // Make common errors more user-friendly
+        if (errorDesc.includes("Email+link+is+invalid+or+has+expired")) {
+          helpMessage = "The verification link has expired or has already been used. Please try to log in, or sign up again if you don't have an account.";
+        }
+        
+        setError(helpMessage);
+        toast.error(helpMessage, { duration: 6000 });
+        
+        // Clear the hash so the message doesn't keep appearing
+        window.history.replaceState(null, "", window.location.pathname);
+      }
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
