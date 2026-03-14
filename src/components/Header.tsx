@@ -256,7 +256,11 @@ const Header = () => {
                       </div>
                       <p className="text-sm font-medium text-foreground">{t("noNotifications")}</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {location.pathname.startsWith("/provider") ? t("notifEmptyDescProvider") : t("notifEmptyDesc")}
+                        {location.pathname.startsWith("/admin") 
+                          ? t("notifEmptyDescAdmin") || "We'll notify you if any reports come in."
+                          : location.pathname.startsWith("/provider") 
+                            ? t("notifEmptyDescProvider") 
+                            : t("notifEmptyDesc")}
                       </p>
                     </div>
                   ) : (

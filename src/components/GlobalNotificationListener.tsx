@@ -17,24 +17,26 @@ const GlobalNotificationListener = () => {
                 providerSupabase.auth.getSession()
             ]);
 
+            const isAdmin = sessionStorage.getItem("adminAuth") === "true";
             const session = workerSession.data.session || providerSession.data.session;
             const activeSupabase = workerSession.data.session ? workerSupabase : providerSupabase;
 
-            if (!session?.user) {
-                console.log("No session found in either Supabase client for GlobalNotificationListener");
+            if (!session?.user && !isAdmin) {
+                console.log("No session found in either Supabase client and not admin for GlobalNotificationListener");
                 return;
             }
 
-            const userId = session.user.id;
-            console.log("Setting up notification listeners for user:", userId);
+            const userId = session?.user?.id;
+            console.log("Setting up notification listeners for user:", userId, "isAdmin:", isAdmin);
 
             // Cleanup old channels if they exist
             if (appsChannel) activeSupabase.removeChannel(appsChannel);
             if (jobsChannel) activeSupabase.removeChannel(jobsChannel);
             if (notificationsChannel) activeSupabase.removeChannel(notificationsChannel);
 
-            // 1. Listen for Application Acceptance
-            appsChannel = activeSupabase
+            if (userId) {
+                // 1. Listen for Application Acceptance
+                appsChannel = activeSupabase
                 .channel("global_application_updates")
                 .on(
                     "postgres_changes",
@@ -133,18 +135,18 @@ const GlobalNotificationListener = () => {
                         });
                     }
                 )
-                .subscribe((status) => {
-                    console.log("System notifications subscription status:", status);
-                });
+                    .subscribe((status) => {
+                        console.log("System notifications subscription status:", status);
+                    });
 
-            // 4. Listen for New Applications (For Providers)
-            const { data: roleData } = await activeSupabase
-                .from("user_roles")
-                .select("role")
-                .eq("user_id", userId)
-                .maybeSingle();
+                // 4. Listen for New Applications (For Providers)
+                const { data: roleData } = await activeSupabase
+                    .from("user_roles")
+                    .select("role")
+                    .eq("user_id", userId)
+                    .maybeSingle();
 
-            if (roleData?.role === "provider") {
+                if (roleData?.role === "provider") {
                 console.log("Setting up provider notification listener for user:", userId);
                 activeSupabase
                     .channel("provider_notifications")
@@ -175,11 +177,22 @@ const GlobalNotificationListener = () => {
                         }
                     )
                     .subscribe();
-            }
+                }
+            } // end of if (userId) block
 
             // 5. Listen for New Reports (For Admins)
-            if (roleData?.role === "admin") {
-                console.log("Setting up admin notification listener for user:", userId);
+            let isUserAdmin = false;
+            if (userId) {
+                const { data: roleData } = await activeSupabase
+                    .from("user_roles")
+                    .select("role")
+                    .eq("user_id", userId)
+                    .maybeSingle();
+                if (roleData?.role === "admin") isUserAdmin = true;
+            }
+
+            if (isAdmin || isUserAdmin) {
+                console.log("Setting up admin notification listener...");
                 activeSupabase
                     .channel("admin_notifications")
                     .on(
