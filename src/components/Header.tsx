@@ -221,8 +221,12 @@ const Header = () => {
         </div>
 
         <nav className="flex items-center gap-1 sm:gap-2">
-          {/* Notification Bell - hidden on provider portal and settings page */}
-          {!location.pathname.startsWith("/settings") && (
+          {/* Notification Bell - hidden on provider portal, settings page, home page, and auth pages */}
+          {!location.pathname.startsWith("/settings") && 
+           location.pathname !== "/" && 
+           !location.pathname.startsWith("/login") && 
+           !location.pathname.startsWith("/register") && 
+           (
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -304,19 +308,6 @@ const Header = () => {
             </Button>
           )}
 
-          {/* Logout Button */}
-          {(user || isAdmin) && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="touch-target text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-              title={t("logout")}
-              onClick={handleLogout}
-            >
-              <LogOut className="h-5 w-5" />
-            </Button>
-          )}
-
           {/* User Section - Hidden on admin page */}
           {!location.pathname.startsWith("/admin") && (
             user ? (
@@ -335,14 +326,14 @@ const Header = () => {
                   </Avatar>
                 </Button>
               </div>
-            ) : (
+            ) : location.pathname !== "/" && !location.pathname.startsWith("/login") && !location.pathname.startsWith("/register") ? (
               <Link to="/login">
                 <Button variant="default" className="touch-target gap-2 ml-1">
                   <LogIn className="h-5 w-5" />
                   <span className="hidden sm:inline">{t("login")}</span>
                 </Button>
               </Link>
-            )
+            ) : null
           )}
         </nav>
       </div>
